@@ -3,68 +3,74 @@
 {% block title %}My Todos{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>My Todos</h2>
-    <a href="{% url 'todo_create' %}" class="btn btn-primary">Add New Todo</a>
-</div>
+<div class="container py-4">
 
-<!-- Filters and Sort -->
-<div class="row mb-3">
-    <div class="col-md-6">
-        <div class="btn-group">
-            <a href="?filter=all{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
-               class="btn btn-outline-secondary {% if filter_type == 'all' %}active{% endif %}">All</a>
-            <a href="?filter=active{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
-               class="btn btn-outline-secondary {% if filter_type == 'active' %}active{% endif %}">Active</a>
-            <a href="?filter=completed{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
-               class="btn btn-outline-secondary {% if filter_type == 'completed' %}active{% endif %}">Completed</a>
+    <!-- Header -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 text-center text-md-start">
+        <h2 class="fw-bold text-success mb-3 mb-md-0">
+            <i class="bi bi-list-check me-2"></i>My Todos
+        </h2>
+        <a href="{% url 'todo_create' %}" class="btn btn-success shadow-sm px-4 py-2">
+            <i class="bi bi-plus-circle me-1"></i> Add New Todo
+        </a>
+    </div>
+
+    <!-- Filters and Sort -->
+    <div class="row mb-4 g-3">
+        <div class="col-12 col-md-6 text-center text-md-start">
+            <div class="btn-group flex-wrap shadow-sm" role="group" aria-label="Todo Filters">
+                <a href="?filter=all{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+                   class="btn btn-outline-secondary {% if filter_type == 'all' %}active{% endif %}">All</a>
+                <a href="?filter=active{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+                   class="btn btn-outline-secondary {% if filter_type == 'active' %}active{% endif %}">Active</a>
+                <a href="?filter=completed{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+                   class="btn btn-outline-secondary {% if filter_type == 'completed' %}active{% endif %}">Completed</a>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 text-center text-md-end">
+            <div class="btn-group flex-wrap shadow-sm" role="group" aria-label="Todo Sort Options">
+                <a href="?sort=newest{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
+                   class="btn btn-outline-secondary {% if sort_by == 'newest' %}active{% endif %}">Newest</a>
+                <a href="?sort=oldest{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
+                   class="btn btn-outline-secondary {% if sort_by == 'oldest' %}active{% endif %}">Oldest</a>
+                <a href="?sort=priority{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
+                   class="btn btn-outline-secondary {% if sort_by == 'priority' %}active{% endif %}">Priority</a>
+            </div>
         </div>
     </div>
-    <div class="col-md-6 text-end">
-        <div class="btn-group">
-            <a href="?sort=newest{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
-               class="btn btn-outline-secondary {% if sort_by == 'newest' %}active{% endif %}">Newest</a>
-            <a href="?sort=oldest{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
-               class="btn btn-outline-secondary {% if sort_by == 'oldest' %}active{% endif %}">Oldest</a>
-            <a href="?sort=priority{% if filter_type %}&filter={{ filter_type }}{% endif %}" 
-               class="btn btn-outline-secondary {% if sort_by == 'priority' %}active{% endif %}">Priority</a>
-        </div>
-    </div>
-</div>
 
-<!-- Todo List -->
 {% if todos %}
-    <div class="row">
+    <!-- ✅ Responsive Card Grid -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for todo in todos %}
-        <div class="col-md-6 mb-3">
-            <div class="card priority-{{ todo.priority }} {% if todo.completed %}completed{% endif %}">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <h5 class="card-title">{{ todo.title }}</h5>
-                            {% if todo.description %}
+        <div class="col">
+            <div class="card h-100 shadow-sm priority-{{ todo.priority }} {% if todo.completed %}completed{% endif %}">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title">{{ todo.title }}</h5>
+                        {% if todo.description %}
                             <p class="card-text">{{ todo.description }}</p>
-                            {% endif %}
-                            <div class="d-flex gap-2 text-muted small">
-                                <span class="badge bg-{% if todo.priority == 'high' %}danger{% elif todo.priority == 'medium' %}warning{% else %}success{% endif %}">
-                                    {{ todo.get_priority_display }}
-                                </span>
-                                {% if todo.due_date %}
+                        {% endif %}
+                        <div class="d-flex flex-wrap gap-2 text-muted small">
+                            <span class="badge bg-{% if todo.priority == 'high' %}danger{% elif todo.priority == 'medium' %}warning{% else %}success{% endif %}">
+                                {{ todo.get_priority_display }}
+                            </span>
+                            {% if todo.due_date %}
                                 <span>Due: {{ todo.due_date }}</span>
-                                {% endif %}
-                                <span>Created: {{ todo.created_at|date:"M d, Y" }}</span>
-                            </div>
+                            {% endif %}
+                            <span>Created: {{ todo.created_at|date:"M d, Y" }}</span>
                         </div>
-                        <div class="btn-group">
-                            <form method="post" action="{% url 'todo_toggle' todo.pk %}" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-{% if todo.completed %}secondary{% else %}success{% endif %}">
-                                    {% if todo.completed %}Undo{% else %}Complete{% endif %}
-                                </button>
-                            </form>
-                            <a href="{% url 'todo_update' todo.pk %}" class="btn btn-sm btn-warning">Edit</a>
-                            <a href="{% url 'todo_delete' todo.pk %}" class="btn btn-sm btn-danger">Delete</a>
-                        </div>
+                    </div>
+
+                    <div class="btn-group mt-3">
+                        <form method="post" action="{% url 'todo_toggle' todo.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-{% if todo.completed %}secondary{% else %}success{% endif %}">
+                                {% if todo.completed %}Undo{% else %}Complete{% endif %}
+                            </button>
+                        </form>
+                        <a href="{% url 'todo_update' todo.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                        <a href="{% url 'todo_delete' todo.pk %}" class="btn btn-sm btn-danger">Delete</a>
                     </div>
                 </div>
             </div>
@@ -78,4 +84,5 @@
         <a href="{% url 'todo_create' %}" class="btn btn-primary">Create Your First Todo</a>
     </div>
 {% endif %}
+</div>
 {% endblock %}
