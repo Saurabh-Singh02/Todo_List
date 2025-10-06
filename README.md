@@ -16,4 +16,4 @@ A simple and functional To-Do web application built with Django. Users can add, 
 - ✅ Mark tasks as complete
 - 🗑️ Delete tasks
 - 🕒 Track task creation and completion dates
-- 📱 Fully responsive UI (optional, depending on your frontend)
+- 📱 Fully responsive UI 
